@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>canvas文字粒子效果-添加散开动画</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no" />
+		<style>
+			*{padding:0;margin:0;box-sizing:border-box;}
+			html,body{height:100vh;width:100vw;overflow: hidden;}
+			canvas{background-color:#000;}
+			button.sure-btn{padding:5px 10px;border:none;background-color:#5cb85c;color:#fff;cursor:pointer;}
+			button.sure-btn:hover{background-color:#449d44;}
+			label.setting-btn{position:fixed;display:block;top:0;right:0;z-index:10;padding:10px 20px;background-color:#d9534f;color:#fff;cursor:pointer;}
+			label.setting-btn:hover{background-color:#c9302c;}
+			#showSetting:checked~.setting{right:0;}
+			.setting{position:fixed;top:50px;right:-300px;width: 300px;border:1px solid #ddd;-webkit-transition: all .3s;transition: all .3s;}
+			.setting .setting-header,.setting .setting-body{padding:10px;}
+			.setting .setting-header{background-color:#ddd;text-align: right;}
+			.setting .setting-body{max-height:500px;background-color:#fff;overflow: auto;}
+			.setting input{display:block;width:100%;padding:5px 10px;margin-bottom:10px;border:1px solid #ddd;}
+			.setting img{width: 100%;height:auto;}
+		</style>
+	</head>
+	<body>
+		<label for="showSetting" class="setting-btn" id="settingBtn">设置</label>
+		<input type="checkbox" id="showSetting" style="display: none;" />
+		<div class="setting">
+			<div class="setting-header">
+				<button type="button" class="sure-btn" id="sureBtn">确认</button>
+			</div>
+			<div class="setting-body">
+				<input id="textInput" type="text" placeholder="输入文字，中文逗号分隔" />
+				<input id="flieInput" type="file" name="file" />
+				<div id="imgDiv">
+					<img id="img" src="img/demo.jpg" alt="图片" />
+				</div>
+			</div>
+		</div>
+		<canvas id="canvas" width="600" height="400"></canvas>
+		<script type="text/javascript">
+				var c = document.getElementById("canvas");
+				c.width = window.innerWidth;
+				c.height = window.innerHeight;
+				var ctx = c.getContext("2d");
+				/*圆点间隔*/
+				var space = 12;
+				/*圆点半径*/
+				var radius = 4;
+				/*焦距*/
+				var jiaoju = 10;
+				/*判断是否结束当前动画状态*/
+				var isEnd = false;
+				/*判断圆是否回到初始位置*/
+				var isHome = false;
+				/*判断是否绘制图片*/
+				var isDrawImg = false;
+				/*保存动画节点的时间点*/
+				var timeMark;
+				/*文本集合*/
+				var txtArray = [];
+				/*当前文本*/
+				var moveCount = 0;
+				/*需要的像素集合*/
+				var pixels = [];
+				/*保存每个像素的位置信息和颜色   并在当前位置创建圆 */
+				function Pixel(centerX,centerY,imageData,i){
+					/*像素在文字或图片上的初始的位置*/
+					this.x = centerX;
+					this.y = centerY;
+					/*当前状态下的位置*/
+					this.nx = centerX;
+					this.ny = centerY;
+					/*飞散状态时的位置*/
+					this.ox = 0;
+					this.oy = 0;
+					/*当前位置颜色*/
+					this.color = "rgba("+imageData.data[i]+","+imageData.data[i+1]+","+imageData.data[i+2]+","+imageData.data[i+3] +")";
+				}
+				Pixel.prototype.paint=function(){
+						ctx.beginPath();
+						ctx.arc(this.nx,this.ny,radius,0,2*Math.PI);
+						ctx.fillStyle = this.color;
+						ctx.fill();
+						ctx.closePath();
+				}
+				/*判断显示文字或图片，获取像素信息*/
+				function getPixelData(dataTxt){
+					isEnd = false;
+					isHome = false;
+					if(dataTxt){
+						moveCount = 0;
+						txtArray = dataTxt;		
+					} 
+					if(moveCount <= txtArray.length){
+						if(moveCount < txtArray.length){
+							drawText();
+						}
+						if(moveCount == txtArray.length){
+							space = 6;
+							radius = 2;
+							drawImg();
+						}
+						moveCount++;
+						pixels.length = 0;
+						var imageData = ctx.getImageData(0,0,c.width,c.height); 
+						for(var x = 0;x<imageData.width;x+=space){
+							for(var y = 0;y<imageData.height;y+=space){
+								var i = (y*imageData.width + x)*4;/*获取当前像素的rgba值中的r位置*/
+								if(imageData.data[i+3]>=128){/*判断当前像素的rgba值中的a的值，是否不透明，不透明可用 */
+									pixels.push(new Pixel(x,y,imageData,i));/*加入可用像素集合*/
+								}
+							}
+						}
+						/*设置每个圆的随机位置*/
+						getRandomPos();
+					}
+				}
+				/*设置文本*/ 
+				function drawText(){
+					ctx.clearRect(0,0,c.width,c.height);
+					var gradient = ctx.createLinearGradient(0,0,c.width,0);
+					gradient.addColorStop(0,"rgba(0,255,0,1)");
+					gradient.addColorStop(1,"rgba(0,0,255,1)");
+					ctx.font = "220px 微软雅黑   bold";
+					ctx.fillStyle = gradient;
+					ctx.textAlign = "center";
+					ctx.textBaseline = "middle";
+					ctx.fillText(txtArray[moveCount],c.width/2,c.height/2);
+				}
+				/*绘制图片*/
+				function drawImg(){
+					ctx.clearRect(0,0,c.width,c.height);
+					var img=document.getElementById("img");
+					ctx.drawImage(img,(c.width-img.width)/2,(c.height-img.height)/2,img.width,img.height);
+				}
+				/*设置圆的随机位置*/
+				function getRandomPos(){
+					pixels.forEach(function(item,index){
+						var _this = pixels[index];
+						_this.nx = Math.random()*c.width;
+						_this.ny = Math.random()*c.height;
+						
+						_this.ox = Math.random()*c.width;
+						_this.oy = Math.random()*c.height;
+						
+						_this.paint();
+					});
+					timeMark = new Date();
+					timeMark = timeMark.getTime();
+					/*执行动画*/
+					animate();
+				}
+				/*执行动画*/
+				function animate(){
+					ctx.clearRect(0,0,c.width,c.height);
+					var newTimeMark =new Date();
+					newTimeMark = newTimeMark.getTime();
+					pixels.forEach(function(item,index){
+						var _this = pixels[index];
+						if(!isHome){
+							if(Math.abs(_this.x - _this.nx)<0.1 && Math.abs(_this.y - _this.ny)<0.1){
+								_this.nx = _this.x;
+								_this.ny = _this.y;
+								if(newTimeMark - timeMark >=1500){
+									isHome = true;
+								}
+							}else{
+								_this.nx = _this.nx +(_this.x - _this.nx)*0.1;
+								_this.ny = _this.ny +(_this.y - _this.ny)*0.1;
+								isHome = false;
+							}
+						}else{
+							if(Math.abs(_this.ox - _this.nx)<0.1 && Math.abs(_this.oy - _this.ny)<0.1){
+								_this.nx = _this.ox;
+								_this.ny = _this.oy;
+								isEnd = true;
+							}else{
+								_this.nx = _this.nx +(_this.ox - _this.nx)*0.1;
+								_this.ny = _this.ny +(_this.oy - _this.ny)*0.1;
+								isEnd = false;
+							}
+						}
+						_this.paint();
+					});
+					if(!isEnd){
+						var timer = requestAnimationFrame(animate);
+					}else{
+						getPixelData();
+					}
+				}
+				
+			function creatNewAnimate(){
+				var text = document.getElementById("textInput").value;	
+				var img = document.getElementById("img");
+				if(!text.trim() && !img){
+					alert("请上传文字或图片")
+				}else if(text.trim() && !img){
+					alert("请上传图片")
+				}else if(!text.trim() && img){
+					getPixelData([]);
+				}else{
+					getPixelData(text.split("，"));
+				}
+				
+			}
+			function addImg(){
+				var imgDiv = document.getElementById("imgDiv");
+				var img = document.getElementById("img");
+				var file = this.files[0];
+				var reader = new FileReader();
+				if(!/image\/\w+/.test(file.type)){
+				        imgDiv.innerHTML = '<span style="color:red;">请上传图片文件！</span>';
+				        return false;
+				}
+				reader.readAsDataURL(file);
+				reader.onload = function(e){
+				    imgDiv.innerHTML = '<img id="img" src="'+this.result+'"/>';
+				}
+			}
+			window.onload = function(){
+				/*初始化*/
+				getPixelData(['请点击','设置按钮']);
+				document.getElementById("flieInput").onchange = addImg;
+				document.getElementById("sureBtn").onclick = creatNewAnimate;
+				console.log("%c 前端工程师，QQ:458462463", "padding:200px 100px;line-height:200px;text-align:center;color:green;fonr-size:120px;font-weight:bold;background:url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1517817693847&di=0944e840183a945375554a314e0f0ea7&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F0139b1569478906ac725af230132d0.gif') center/100% 100% no-repeat;");
+			}
+		</script>
+	</body>
+</html>

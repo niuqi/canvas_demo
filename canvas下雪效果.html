@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>下雪</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no" />
+		<style>
+			*{padding:0;margin:0;}
+			body{overflow: hidden;}
+		</style>
+	</head>
+	<body></body>
+	<script type="text/javascript">
+		var Snow = function(w,h){
+				this.snows = [];
+				this.ctx = null;
+				this.width = window.innerWidth;
+				this.height = window.innerHeight;
+				this.init();
+		};
+		Snow.prototype = {
+			init:function(){
+				var _this = this;
+				var c = document.createElement("canvas");
+				c.setAttribute("id","canvasSnow");
+				c.style.width = _this.width+"px";
+				c.style.height = _this.height+"px";
+				c.style.backgroundColor = "#000";
+				document.body.appendChild(c);
+				_this.ctx = document.querySelector("#canvasSnow").getContext("2d");
+				_this.creatSnow();
+			},
+			creatSnow:function(){
+				var _this = this;
+				for(var i=0;i<500;i++){
+					setTimeout(function(){
+						var newSnow = {};
+						_this.getSnowSize(_this,newSnow);
+						_this.snows.push(newSnow);	
+					},10*i);
+				}	
+				_this.move(_this);
+			},
+			getSnowSize:function(_this,newSnow){
+				newSnow.x = _this.random(0,_this.width),
+				newSnow.y = 0,
+				newSnow.r = _this.random(.1,5),
+				newSnow.Xspeed = _this.random(-1,1);
+				newSnow.Yspeed = _this.random(1,3);
+			},
+			move:function(_this){
+				_this.ctx.clearRect(0,0,_this.width,_this.height);
+				for(var i=0;i<_this.snows.length;i++){
+					_this.ctx.beginPath();
+					_this.ctx.fillStyle = "#fff";
+					_this.ctx.arc(_this.snows[i].x,_this.snows[i].y,_this.snows[i].r,0,Math.PI*2);
+					_this.ctx.fill();
+					_this.ctx.closePath();
+					if(_this.snows[i].x>=_this.snows[i].r && _this.snows[i].x<=(_this.width+_this.snows[i].r)){
+						_this.snows[i].x += _this.snows[i].Xspeed;
+					}else{
+						_this.snows[i].x = _this.random(0,_this.width);
+					};
+					if(_this.snows[i].y<=(_this.height+_this.snows[i].r)){
+						_this.snows[i].y += _this.snows[i].Yspeed;
+					}else{
+						_this.snows[i].y = 0;
+					}
+				}
+				setTimeout(function fn(){
+					_this.move(_this)
+				},1000/60);
+			},
+			random:function(min,max){
+				return Math.random()*(max-min)+min;
+			}
+		}
+		window.onload = function(){
+			new Snow();
+			console.log("%c 前端工程师，QQ:458462463", "padding:200px 100px;line-height:200px;text-align:center;color:green;fonr-size:120px;font-weight:bold;background:url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1517817693847&di=0944e840183a945375554a314e0f0ea7&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F0139b1569478906ac725af230132d0.gif') center/100% 100% no-repeat;");
+		}
+	</script>
+</html>
