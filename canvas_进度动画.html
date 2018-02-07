@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no" />
-		<title>进度条</title>
+		<title>加载效果</title>
 		<style>
 			*{padding:0;margin:0;box-sizing: border-box;}
 			html,body{width:100vw;height:100vh;}
@@ -27,16 +27,24 @@
 					this.c.style.marginTop = -this.c.height/2 + "px";
 					this.c.style.marginLeft = -this.c.width/2 + "px";
 					this.c.style.backgroundColor = "#31b0d5";
-					this.c.style.boxShadow = "0 0 6px rgba(0,0,0,.4)";
+					this.c.style.borderRight = "1px solid rgba(255,255,255,.4)";
+					this.c.style.borderBottom = "1px solid rgba(255,255,255,.4)";
+					this.c.style.boxShadow = "5px 3px rgba(0,0,0,.4)";
 					this.c.style.borderRadius = "4px";
 				}else{
 					this.c = document.getElementById("canvasLoading");
 				}
 				this.c.style.display = "block";
 				this.ctx = this.c.getContext("2d");
+				this.ctx.lineWidth = 1;
 				/*线条基础坐标点*/
-				this.lineX = 5;
-				this.lineY = 8;
+				this.lineTopBeginX = 50;
+				this.lineTopEndX = 95;
+				this.lineTopY = 10;
+				
+				this.lineBottomBeginX = 5;
+				this.lineBottomEndX = 95;
+				this.lineBottomY = 60;
 				/*矩形基础坐标点*/
 				this.rectX = 0;
 				this.rectY = 0;
@@ -47,16 +55,25 @@
 				this.isEnd = false;
 				this.move();
 			}
-			canvasLoading.prototype.creatLine = function(){
+			canvasLoading.prototype.creatTopLine = function(){
 				var _this = this;
 				_this.ctx.beginPath();
 				_this.ctx.strokeStyle = "#fff";
-				_this.ctx.moveTo(_this.lineX,_this.lineY);
-				_this.ctx.lineTo(_this.lineX+90,_this.lineY);
+				_this.ctx.moveTo(_this.lineTopBeginX,_this.lineTopY);
+				_this.ctx.lineTo(_this.lineTopEndX,_this.lineTopY);
 				_this.ctx.stroke();
 				_this.ctx.closePath();
-				_this.lineY += 15;
+				_this.lineTopY += 15;
+			}
+			canvasLoading.prototype.creatBottomLine = function(){
+				var _this = this;
+				_this.ctx.beginPath();
+				_this.ctx.strokeStyle = "#fff";
+				_this.ctx.moveTo(_this.lineBottomBeginX,_this.lineBottomY);
+				_this.ctx.lineTo(_this.lineBottomEndX,_this.lineBottomY);
+				_this.ctx.stroke();
 				_this.ctx.closePath();
+				_this.lineBottomY += 15;
 			}
 			canvasLoading.prototype.creatRect = function(){
 				var _this = this;
@@ -65,9 +82,8 @@
 				_this.ctx.fillRect(_this.rectX,_this.rectY,50,50);
 				_this.ctx.closePath();
 				_this.ctx.beginPath();
-				_this.ctx.strokeStyle = "#fff";
-				_this.ctx.rect(_this.rectX+8,_this.rectY+8,35,35);
-				_this.ctx.stroke();
+				_this.ctx.fillStyle = "rgba(255,255,255,.4)";
+				_this.ctx.fillRect(_this.rectX+10,_this.rectY+10,30,30);
 				_this.ctx.closePath();
 			}
 			canvasLoading.prototype.creatText = function(){
@@ -86,16 +102,18 @@
 				if(_this.isEnd) return;
 				/*清空画布 */
 				_this.ctx.clearRect(0,0,_this.c.width,_this.c.height);
-				_this.lineX = 5;
-				_this.lineY = 12;
 				/*创建线条*/
-				for(var i=0;i<=5;i++ ){
-					_this.creatLine();
+				_this.lineTopY = 10;
+				_this.lineBottomY = 60;
+				for(var i=0;i<=2;i++){
+					_this.creatTopLine();
+					_this.creatBottomLine();
 				}
 				/*创建文字*/
-				_this.creatText();
+//				_this.creatText();
 				/*创建矩形*/
 				_this.creatRect();
+				
 				/*每个节点暂停300ms*/
 				if((_this.rectX==0 && _this.rectY==0) 
 				|| (_this.rectX==50 && _this.rectY==0)
@@ -114,17 +132,35 @@
 						_this.timeMarkOut = null;
 					}
 				}
-				/*移动位置*/
+				/**/
+				/*移动线条位置  ,移动矩形位置*/
 				if(_this.rectX<50 && _this.rectY==0){
-					_this.rectX+=2;
+					_this.rectX+=5;
+					if(_this.lineTopBeginX>5){
+						_this.lineTopBeginX-=5;
+						_this.lineTopEndX-=5;
+					}
+					
 				}else if(_this.rectX==50 && _this.rectY<50){
-					_this.rectY+=2;
+					_this.rectY+=5;
+					if(_this.lineTopEndX<95){
+						_this.lineTopEndX+=5;
+						_this.lineBottomEndX-=5;
+					}
 				}else if(_this.rectX>0 && _this.rectY==50){
-					_this.rectX-=2;
+					_this.rectX-=5;
+					if(_this.lineBottomBeginX<50){
+						_this.lineBottomBeginX+=5;
+						_this.lineBottomEndX+=5;
+					}
 				}else if(_this.rectX==0 && _this.rectY>0){
-					_this.rectY-=2;
+					_this.rectY-=5;
+					if(_this.lineTopBeginX<50){
+						_this.lineTopBeginX+=5;
+						_this.lineBottomBeginX-=5;
+					}
 				}
-				/*调用requestAnimationFrame方法*/
+//				/*调用requestAnimationFrame方法*/
 				_this.requestAnimationFrame()(_this.move.bind(_this));
 			}
 			canvasLoading.prototype.requestAnimationFrame = function(callback){
