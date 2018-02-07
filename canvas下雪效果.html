@@ -20,56 +20,59 @@
 		};
 		Snow.prototype = {
 			init:function(){
-				var _this = this;
 				var c = document.createElement("canvas");
 				c.setAttribute("id","canvasSnow");
-				c.style.width = _this.width+"px";
-				c.style.height = _this.height+"px";
+				c.style.width = this.width+"px";
+				c.style.height = this.height+"px";
 				c.style.backgroundColor = "#000";
 				document.body.appendChild(c);
-				_this.ctx = document.querySelector("#canvasSnow").getContext("2d");
-				_this.creatSnow();
+				this.ctx = document.querySelector("#canvasSnow").getContext("2d");
+				this.creatSnow();
 			},
 			creatSnow:function(){
 				var _this = this;
 				for(var i=0;i<500;i++){
 					setTimeout(function(){
 						var newSnow = {};
-						_this.getSnowSize(_this,newSnow);
+						_this.getSnowSize.bind(_this)(newSnow);
 						_this.snows.push(newSnow);	
 					},10*i);
 				}	
-				_this.move(_this);
+				_this.move();
 			},
-			getSnowSize:function(_this,newSnow){
-				newSnow.x = _this.random(0,_this.width),
+			getSnowSize:function(newSnow){
+				newSnow.x = this.random(0,this.width),
 				newSnow.y = 0,
-				newSnow.r = _this.random(.1,5),
-				newSnow.Xspeed = _this.random(-1,1);
-				newSnow.Yspeed = _this.random(1,3);
+				newSnow.r = this.random(.1,5),
+				newSnow.Xspeed = this.random(-1,1);
+				newSnow.Yspeed = this.random(1,3);
 			},
-			move:function(_this){
-				_this.ctx.clearRect(0,0,_this.width,_this.height);
-				for(var i=0;i<_this.snows.length;i++){
-					_this.ctx.beginPath();
-					_this.ctx.fillStyle = "#fff";
-					_this.ctx.arc(_this.snows[i].x,_this.snows[i].y,_this.snows[i].r,0,Math.PI*2);
-					_this.ctx.fill();
-					_this.ctx.closePath();
-					if(_this.snows[i].x>=_this.snows[i].r && _this.snows[i].x<=(_this.width+_this.snows[i].r)){
-						_this.snows[i].x += _this.snows[i].Xspeed;
+			move:function(){
+				this.ctx.clearRect(0,0,this.width,this.height);
+				for(var i=0;i<this.snows.length;i++){
+					this.ctx.beginPath();
+					this.ctx.fillStyle = "#fff";
+					this.ctx.arc(this.snows[i].x,this.snows[i].y,this.snows[i].r,0,Math.PI*2);
+					this.ctx.fill();
+					this.ctx.closePath();
+					if(this.snows[i].x>=this.snows[i].r && this.snows[i].x<=(this.width+this.snows[i].r)){
+						this.snows[i].x += this.snows[i].Xspeed;
 					}else{
-						_this.snows[i].x = _this.random(0,_this.width);
+						this.snows[i].x = this.random(0,this.width);
 					};
-					if(_this.snows[i].y<=(_this.height+_this.snows[i].r)){
-						_this.snows[i].y += _this.snows[i].Yspeed;
+					if(this.snows[i].y<=(this.height+this.snows[i].r)){
+						this.snows[i].y += this.snows[i].Yspeed;
 					}else{
-						_this.snows[i].y = 0;
+						this.snows[i].y = 0;
 					}
 				}
-				setTimeout(function fn(){
-					_this.move(_this)
-				},1000/60);
+				this.requestAnimationFrame()(this.move.bind(this));
+			},
+			requestAnimationFrame : function(callback){
+				return window.requestAnimationFrame
+					|| window.webkitRequestAnimationFrame
+					|| window.mozRequestAnimationFrame
+					|| function(){setTimeout(callback,1000/60)}
 			},
 			random:function(min,max){
 				return Math.random()*(max-min)+min;
