@@ -145,16 +145,14 @@
 						
 						_this.paint();
 					});
-					timeMark = new Date();
-					timeMark = timeMark.getTime();
+					timeMark = (new Date()).getTime();
 					/*执行动画*/
 					animate();
 				}
 				/*执行动画*/
 				function animate(){
 					ctx.clearRect(0,0,c.width,c.height);
-					var newTimeMark =new Date();
-					newTimeMark = newTimeMark.getTime();
+					var newTimeMark =(new Date()).getTime();
 					pixels.forEach(function(item,index){
 						var _this = pixels[index];
 						if(!isHome){
@@ -183,12 +181,17 @@
 						_this.paint();
 					});
 					if(!isEnd){
-						var timer = requestAnimationFrame(animate);
+						var timer = checkAnimationFrame()(animate);
 					}else{
 						getPixelData();
 					}
 				}
-				
+			function checkAnimationFrame (){
+				return window.requestAnimationFrame
+					|| window.webkitRequestAnimationFrame
+					|| window.mozRequestAnimationFrame
+					|| function(){setTimeout(callback,1000/60)}
+			}
 			function creatNewAnimate(){
 				var text = document.getElementById("textInput").value;	
 				var img = document.getElementById("img");
