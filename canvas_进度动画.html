@@ -26,7 +26,7 @@
 					this.c.style.left = "50%";
 					this.c.style.marginTop = -this.c.height/2 + "px";
 					this.c.style.marginLeft = -this.c.width/2 + "px";
-					this.c.style.backgroundColor = "#31b0d5";
+					this.c.style.backgroundColor = "#357ca5";
 					this.c.style.borderRight = "1px solid rgba(255,255,255,.4)";
 					this.c.style.borderBottom = "1px solid rgba(255,255,255,.4)";
 					this.c.style.boxShadow = "5px 3px rgba(0,0,0,.4)";
@@ -36,15 +36,14 @@
 				}
 				this.c.style.display = "block";
 				this.ctx = this.c.getContext("2d");
+				/*线条宽度和颜色*/
 				this.ctx.lineWidth = 1;
 				/*线条基础坐标点*/
 				this.lineTopBeginX = 50;
 				this.lineTopEndX = 95;
-				this.lineTopY = 10;
-				
 				this.lineBottomBeginX = 5;
 				this.lineBottomEndX = 95;
-				this.lineBottomY = 60;
+				this.lineY = 10;
 				/*矩形基础坐标点*/
 				this.rectX = 0;
 				this.rectY = 0;
@@ -55,36 +54,27 @@
 				this.isEnd = false;
 				this.move();
 			}
-			canvasLoading.prototype.creatTopLine = function(){
+			canvasLoading.prototype.creatLine = function(){
 				var _this = this;
-				_this.ctx.beginPath();
 				_this.ctx.strokeStyle = "#fff";
-				_this.ctx.moveTo(_this.lineTopBeginX,_this.lineTopY);
-				_this.ctx.lineTo(_this.lineTopEndX,_this.lineTopY);
-				_this.ctx.stroke();
-				_this.ctx.closePath();
-				_this.lineTopY += 15;
-			}
-			canvasLoading.prototype.creatBottomLine = function(){
-				var _this = this;
 				_this.ctx.beginPath();
-				_this.ctx.strokeStyle = "#fff";
-				_this.ctx.moveTo(_this.lineBottomBeginX,_this.lineBottomY);
-				_this.ctx.lineTo(_this.lineBottomEndX,_this.lineBottomY);
+				_this.ctx.moveTo(_this.lineTopBeginX,_this.lineY);
+				_this.ctx.lineTo(_this.lineTopEndX,_this.lineY);
 				_this.ctx.stroke();
-				_this.ctx.closePath();
-				_this.lineBottomY += 15;
+				_this.ctx.beginPath();
+				_this.ctx.moveTo(_this.lineBottomBeginX,_this.lineY+50);
+				_this.ctx.lineTo(_this.lineBottomEndX,_this.lineY+50);
+				_this.ctx.stroke();
+				_this.lineY += 15;
 			}
 			canvasLoading.prototype.creatRect = function(){
 				var _this = this;
 				_this.ctx.beginPath();
-				_this.ctx.fillStyle = "#31b0d5";
+				_this.ctx.fillStyle = "#357ca5";
 				_this.ctx.fillRect(_this.rectX,_this.rectY,50,50);
-				_this.ctx.closePath();
 				_this.ctx.beginPath();
-				_this.ctx.fillStyle = "rgba(255,255,255,.4)";
-				_this.ctx.fillRect(_this.rectX+10,_this.rectY+10,30,30);
-				_this.ctx.closePath();
+				_this.ctx.strokeStyle = "#fff";
+				_this.ctx.strokeRect(_this.rectX+10,_this.rectY+10,30,30);
 			}
 			canvasLoading.prototype.creatText = function(){
 				var _this = this;
@@ -103,11 +93,9 @@
 				/*清空画布 */
 				_this.ctx.clearRect(0,0,_this.c.width,_this.c.height);
 				/*创建线条*/
-				_this.lineTopY = 10;
-				_this.lineBottomY = 60;
+				_this.lineY = 10;
 				for(var i=0;i<=2;i++){
-					_this.creatTopLine();
-					_this.creatBottomLine();
+					_this.creatLine();
 				}
 				/*创建文字*/
 //				_this.creatText();
