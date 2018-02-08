@@ -160,14 +160,14 @@
 						_this.lineBottomBeginX-=5;
 					}
 				}
-//				/*调用requestAnimationFrame方法*/
+				/*调用requestAnimationFrame方法*/
 				_this.requestAnimationFrame()(_this.move.bind(_this));
 			}
-			canvasLoading.prototype.requestAnimationFrame = function(callback){
+			canvasLoading.prototype.requestAnimationFrame = function(){
 				return window.requestAnimationFrame
 					|| window.webkitRequestAnimationFrame
 					|| window.mozRequestAnimationFrame
-					|| function(){setTimeout(callback,1000/60)}
+					|| function(callback){setTimeout(callback,1000/60)}
 			}
 			canvasLoading.prototype.hide = function(){
 				this.isEnd = true;
